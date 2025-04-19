@@ -5,18 +5,40 @@ import MOCK from "./components/ChatList/mock";
 import CHAT_MOCK from "./components/ChatMessage/mock";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import ChatMessage from "./components/ChatMessage/ChatMessage";
+import Modal from "./components/Modal/Modal";
 
 function App() {
   const [chatId, setChatId] = useState(MOCK[0].id);
   const [data, setData] = useState(MOCK[0]);
   const [username, setUsername] = useState("Alice");
+  const [modal, setModal] = useState<string | null>(null);
+
+  const handleChatChange = (id: string) => {
+    const selectedChat = MOCK.find((chat) => chat.id === id);
+    if (selectedChat) {
+      setChatId(id);
+      setData(selectedChat);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-grow-0 h-screen w-screen bg-zinc-900">
       <div className="flex flex-row h-15 border-b-2 border-gray-500 px-3 py-2 justify-between">
         <p className="text-3xl font-semibold">Group 13</p>
-        <button className="flex border-2 border-gray-500 rounded-md text-xl font-semibold px-3 py-2 items-center justify-center cursor-pointer hover:bg-gray-800">
-          Rename
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setModal("new_group")}
+            className="flex border-2 border-gray-500 rounded-md text-xl font-semibold px-3 py-2 items-center justify-center cursor-pointer hover:bg-gray-800"
+          >
+            New Group
+          </button>
+          <button
+            onClick={() => setModal("rename")}
+            className="flex border-2 border-gray-500 rounded-md text-xl font-semibold px-3 py-2 items-center justify-center cursor-pointer hover:bg-gray-800"
+          >
+            Rename
+          </button>
+        </div>
       </div>
 
       <div className="flex w-full flex-1 overflow-auto">
@@ -28,7 +50,7 @@ function App() {
             {MOCK.map((chat, index) => (
               <div
                 key={index}
-                onClick={() => setChatId(chat.id)}
+                onClick={() => handleChatChange(chat.id)}
                 className="flex flex-col w-full cursor-pointer"
               >
                 <ChatList
@@ -41,7 +63,7 @@ function App() {
         </div>
 
         <div className="flex flex-col w-4/5 flex-1">
-          <div className="flex h-15 border-b-2 border-gray-500 items-center px-3 py-2">
+          <div className="flex justify-between h-15 border-b-2 border-gray-500 items-center px-3 py-2">
             <h4 className="flex text-xl font-semibold items-center gap-2">
               {data.type === "direct" ? (
                 <Icon icon={"mdi:user"} />
@@ -50,6 +72,14 @@ function App() {
               )}
               {data.name}
             </h4>
+            {data.type === "group" && (
+              <button
+                onClick={() => setModal("invite")}
+                className="flex border-2 border-gray-500 rounded-md font-semibold px-2 py-1 items-center justify-center cursor-pointer hover:bg-gray-800"
+              >
+                Invite
+              </button>
+            )}
           </div>
           <div className="flex flex-col gap-2 px-3 overflow-auto flex-1">
             {CHAT_MOCK.map((chat, index) => (
@@ -71,6 +101,19 @@ function App() {
           </div>
         </div>
       </div>
+      {modal === "rename" && (
+        <Modal
+          title="Change your name"
+          onClose={() => setModal(null)}
+          onSubmit={(name: string) => setUsername(name)}
+        />
+      )}
+      {modal === "new_group" && (
+        <Modal title="Create a new group" onClose={() => setModal(null)} />
+      )}
+      {modal === "invite" && (
+        <Modal title="Invite a member" onClose={() => setModal(null)} />
+      )}
     </div>
   );
 }
